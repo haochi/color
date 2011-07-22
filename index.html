@@ -7,15 +7,14 @@
 <div>
   <canvas id="canvas"></canvas>
 </div>
-
-<h2>Select a file</h2>
-<input type="file" id="file" />
-
-<h2>Closest Colors</h2>
-<ul id="list"></ul>
+<div id="select_file">
+  <span id="drop_zone">drop an image here</span> or select one <input type="file" id="file" /> | <button id="toggle_list">toggle colors list</button>
+</div>
+<ul id="colors_list"></ul>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 <script src="colors.js"></script>
+<script src="converter.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

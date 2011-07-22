@@ -1,52 +1,86 @@
 var img = document.createElement("img")
-  , can = document.getElementById("canvas")
-  , ctx = can.getContext("2d")
+  , canvas = document.getElementById("canvas")
+  , ctx = canvas.getContext("2d")
+  , drop_zone = document.getElementById("drop_zone")
   , has_file = false;
-$("#file").change(function(evt){
-  var file = evt.target.files[0]
-    , reader = new FileReader();
 
+drop_zone.addEventListener('dragover', function(e){
+  $(drop_zone).addClass('dragover');
+  preventDefault(e);
+}, false);
+
+drop_zone.addEventListener('dragleave', function(e){
+  $(drop_zone).removeClass('dragover');
+}, false);
+
+drop_zone.addEventListener('drop', function(e){
+  preventDefault(e);
+  image_to_canvas(e.dataTransfer.files[0]);
+}, false);
+
+$("#file").change(function(e){
+  image_to_canvas(e.target.files[0]);
+});
+
+$("#toggle_list").click(function(){
+  $("#colors_list").toggle();
+});
+
+$(canvas).click(function(e){
+  if(has_file){
+    var color = ctx.getImageData(e.pageX, e.pageY - 40, 1, 1).data
+      , cs = closest_colors(color)
+      , list = $("<ul>")
+      , li = $("<li>").addClass("color");
+
+    li.clone().text("Name:  #color").appendTo(list);
+
+    for(var i=0; i<cs.length; i++){
+      var color_name = cs[i][1]
+        , rgb = colors[color_name]
+        , inverted_rgb = rgb.map(function(v){ return 255-v; });
+
+      li.clone() 
+        .text(color_name + ": #" + inverted_rgb.map(function(v){
+          v = v.toString(16);
+          if(v.length < 2){ v = "0" + v; }
+          return v;
+        }).join(""))
+        .css({background: to_rgb(rgb), color: to_rgb(inverted_rgb)})
+      .appendTo(list);
+    }
+    $("#colors_list").replaceWith(list.attr("id", "colors_list"));
+  }
+});
+
+$(canvas).mousemove(function(e){
+  //console.log(e.pageX, e.pageY);
+});
+
+function image_to_canvas(file){
+  var reader = new FileReader();
   if(file.type.match("image.*")){
+    $(canvas).show();
     has_file = true;
     reader.onload = function(e){
       img.src = e.target.result;
       function draw(){
         var ratio = img.width/img.height;
         if(img.width < $(window).width()){
-          can.width = img.width;
-          can.height = img.height;
+          canvas.width = img.width;
+          canvas.height = img.height;
         }else{
-          can.width = $(window).width();
-          can.height = $(window).width()/ratio;
+          canvas.width = $(window).width();
+          canvas.height = $(window).width()/ratio;
         }
-        ctx.drawImage(img, 0, 0, can.width, can.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       };
       img.onload = draw;
       $(window).resize(draw);
     };
     reader.readAsDataURL(file);
   }
-});
-
-$(can).click(function(e){
-  if(has_file){
-    var color = ctx.getImageData(e.pageX, e.pageY, 1, 1).data
-      , cs = closest_colors(color)
-      , list = $("<ul>");
-    for(var i=0; i<cs.length; i++){
-      var color_name = cs[i][1]
-        , rgb = colors[color_name]
-        , span = $("<span>").addClass("color");
-
-      $("<li>")
-        .append(span.clone().html("&nbsp;").css("background", to_rgb(color)))
-        .append(span.clone().html("&nbsp;").css("background", to_rgb(rgb)))
-        .append(span.clone().html(color_name).css("width", "auto"))
-      .appendTo(list);
-    }
-    $("#list").replaceWith(list.attr("id", "list"));
-  }
-});
+}
 
 function color_distance(c1, c2){
   var score = 0;
@@ -57,9 +91,10 @@ function color_distance(c1, c2){
 }
 
 function closest_colors(rgb){
-  var scores = [];
+  var scores = []
+    , lab = rgb_to_lab(rgb);
   for(var color_name in colors){
-    scores.push([color_distance(colors[color_name], rgb), color_name]);
+    scores.push([color_distance(rgb_to_lab(colors[color_name]), lab), color_name]);
   }
   scores.sort(function(a, b){
     return a[0] - b[0];
@@ -69,4 +104,9 @@ function closest_colors(rgb){
 
 function to_rgb(rgb){
   return "rgb(" + [rgb[0], rgb[1], rgb[2]].join(",") + ")";
+}
+
+function preventDefault(e){
+  e.stopPropagation();
+  e.preventDefault();
 }

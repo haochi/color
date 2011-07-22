@@ -1,4 +1,7 @@
 body{ padding: 0; margin: 0 0 10px 0; }
-#canvas{ border: 1px solid #ccc; }
-#list{ list-style-type: none; padding: 0; margin: 0; }
-.color{ display: inline-block; width: 100px; height: 20px; border: 1px solid #fff; }
+#canvas{ display: none; margin: 40px 0 0; }
+#select_file{ text-align: center; width: 100%; position: absolute; top: 0; height: 40px; }
+#drop_zone{ border: 2px dotted #ccc; padding: 5px; display: inline-block; }
+#colors_list{ list-style-type: none; padding: 0; margin: 0; position: absolute; right: 0; top: 0; text-align: right; }
+.dragover{ border: 2px dotted #F15B4C !important; }
+.color{ height: 20px; font-family: Courier, monospace; }
