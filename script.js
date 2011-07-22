@@ -62,7 +62,7 @@ function closest_colors(rgb){
     scores.push([color_distance(colors[color_name], rgb), color_name]);
   }
   scores.sort(function(a, b){
-    return a[0] > b[0];
+    return a[0] - b[0];
   })
   return scores.slice(0, 10);
 }
